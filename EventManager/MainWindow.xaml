@@ -4,9 +4,22 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EventManager"
+        xmlns:views="clr-namespace:EventManager.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Event Manager" Height="450" Width="800">
     <Grid>
-        
+        <StackPanel Background="SandyBrown">
+            <TabControl Name="Tabs1" TabStripPlacement="Top" Margin="10,10,0,5">
+                <TabItem Header="Event Viewer" IsSelected="True" Background="Beige">
+
+                </TabItem>
+                <TabItem Header="Add New Event" IsSelected="False" Background="Beige">
+
+                </TabItem>
+                <TabItem Header="Admin" IsSelected="False" Background="Beige">
+                    <views:Admin/>
+                </TabItem>
+            </TabControl>
+        </StackPanel>
     </Grid>
 </Window>
