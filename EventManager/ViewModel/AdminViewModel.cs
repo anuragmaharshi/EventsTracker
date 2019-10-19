@@ -2,23 +2,32 @@
 using EventManager.Helpers;
 using EventManager.Services;
 using GalaSoft.MvvmLight;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Windows;
+using System.Windows.Data;
+
 
 namespace EventManager.ViewModel
 {
     public class AdminViewModel : ViewModelBase
     {
-        ObservableCollection<OfficerGradeType> _officerGrade;
+        
         public RelayCommand AddOfficerGrade { get; private set; }
         public RelayCommand DeleteOfficerGrade { get; private set; }
         public RelayCommand SaveOfficerGrade { get; private set; }
-        private OfficerGradeType _selectedOfficerGrade;
-        private string _officerGradeName = "";
+
+        public RelayCommand AddNewOfficer { get; private set; }
         IOfficerGrade repo;
+
+        IOfficers officerRepo;
+
+        #region Constructor
         public AdminViewModel()
         {
             if (!ViewModelBase.IsInDesignModeStatic)
@@ -27,44 +36,88 @@ namespace EventManager.ViewModel
                 AddOfficerGrade = new RelayCommand(OnAdd);
                 DeleteOfficerGrade = new RelayCommand(OnDelete, CanDelete);
                 SaveOfficerGrade = new RelayCommand(OnSave, CanSave);
-                repo = new OfficerGradeRepo();
-            }
 
+                AddNewOfficer = new RelayCommand(OnAddOfficer,canAddOfficer);
+                repo = new OfficerGradeRepo();
+                officerRepo = new OfficerRepo();
+            }
         }
+
+       
+
+
+        #endregion
 
         #region Helper methods
         private bool CanSave()
         {
-            throw new NotImplementedException();
+            return SelectedOfficerGrade != null;
         }
 
         private void OnSave()
         {
-            throw new NotImplementedException();
+            repo.UpdateOfficerGrade(SelectedOfficerGrade);
+            LoadData();
         }
 
         private bool CanDelete()
         {
-            throw new NotImplementedException();
+            return SelectedOfficerGrade != null;
         }
 
         private void OnDelete()
         {
-            throw new NotImplementedException();
+            MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("Are you sure?", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
+                repo.DeleteOfficerGrader(SelectedOfficerGrade);
+                SelectedOfficerGrade = null;
+                LoadData();
+            }
+            
         }
 
         private void OnAdd()
         {
-            OfficerGradeType officerGrade = new OfficerGradeType { OfficerGrade = NewOfficerGradeName };
+            OfficerGradeType officerGrade = new OfficerGradeType { OfficerGrade = NewGradeName };
             repo.AddOfficerGradeAsync(officerGrade);
+            LoadData();
+            NewGradeName = "";
+        }
+
+        private void OnAddOfficer()
+        {
+            officerRepo.AddOfficer(new Officers
+            {
+                Name = NewOfficerName,
+                PhoneNumber = NewOfficerPhoneNumber,
+                OfficerGrade = GradeOfNewOfficer
+            });
+  
+        }
+
+        private bool canAddOfficer()
+        {
+            return (NewOfficerName!=null? NewOfficerName.Length > 0:false) && GradeOfNewOfficer != null;
         }
         #endregion
 
+        #region Observable collections
+
+        //for storing new grades
+        private ObservableCollection<OfficerGradeType> _officerGrade;
         public ObservableCollection<OfficerGradeType> OfficerGradeTypes
         {
             get { return _officerGrade; }
-            set { _officerGrade = value; RaisePropertyChanged("OfficerGradeTypes"); }
+            set
+            {
+                _officerGrade = value;
+                RaisePropertyChanged("OfficerGradeTypes");
+            }
         }
+
+        //For getting selected officer grade
+        private OfficerGradeType _selectedOfficerGrade;
         public OfficerGradeType SelectedOfficerGrade
         {
             get
@@ -76,24 +129,127 @@ namespace EventManager.ViewModel
                 _selectedOfficerGrade = value;
                 DeleteOfficerGrade.RaiseCanExecuteChanged();
                 SaveOfficerGrade.RaiseCanExecuteChanged();
+                RaisePropertyChanged("SelectedOfficerGrade");
             }
         }
-
-        public string NewOfficerGradeName
+        //for storing new grades 
+        private string _newGradeName = "";
+        public string NewGradeName
         {
             get
             {
-                return _officerGradeName;
+                return _newGradeName;
             }
             set
             {
-                _officerGradeName = value;
-                RaisePropertyChanged(NewOfficerGradeName);
+                _newGradeName = value;
+                RaisePropertyChanged("NewGradeName");
             }
 
         }
 
+        //for adding grades in officer list. Selected item while adding new officer
+        private OfficerGradeType _gradeOfNewOfficer;
+        public OfficerGradeType GradeOfNewOfficer
+        {
+            get
+            {
+                return _gradeOfNewOfficer;
+            }
+            set
+            {
+                _gradeOfNewOfficer = value;
+                RaisePropertyChanged("GradeOfNewOfficer");
+                AddNewOfficer.RaiseCanExecuteChanged();
+                RefreshList();
+            }
+        }
 
+        private string _officerName;
+        public string NewOfficerName
+        {
+            get
+            {
+                return _officerName;
+            }
+            set
+            {
+                _officerName = value;
+                RaisePropertyChanged("NewOfficerName");
+                AddNewOfficer.RaiseCanExecuteChanged();
+            }
+        }
+
+        private string _officerPhoneNumber;
+        public string NewOfficerPhoneNumber
+        {
+            get
+            {
+                return _officerPhoneNumber;
+            }
+            set
+            {
+                _officerPhoneNumber = value;
+                RaisePropertyChanged("NewOfficerPhoneNumber");
+            }
+        }
+
+        private ObservableCollection<Officers> _officerList;
+        public ObservableCollection<Officers> OfficerList
+        {
+            get
+            {
+                //if (_officerList != null)
+                //{
+                //    this.OfficerListView = CollectionViewSource.GetDefaultView(_officerList);
+                //    this.OfficerListView.Filter = Filter;
+
+
+
+                //}
+                return _officerList;
+            }
+            set
+            {
+                _officerList = value;
+                RaisePropertyChanged("OfficerList");
+            }
+        } 
+
+        private ObservableCollection<Officers> _filteredList;
+        public ObservableCollection<Officers> FilteredOfficerList
+        {
+            get
+            {
+                return _filteredList;
+            }
+            set
+            {
+                _filteredList = value;
+                RaisePropertyChanged("FilteredOfficerList");
+            }
+        } 
+        private ICollectionView OfficerListView { get; set; }
+        //{
+        //    get { return CollectionViewSource.GetDefaultView(OfficerList); }
+        //}
+
+
+        private bool Filter(object item )
+        {
+            Officers officer = item as Officers;
+            if (officer.OfficerGrade.Equals(GradeOfNewOfficer))
+            {
+                return true;
+            }
+            return false;
+        }
+        
+
+
+        #endregion
+
+        #region methods
         public void LoadData()
         {
             ObservableCollection<OfficerGradeType> Temp= new ObservableCollection<OfficerGradeType>();
@@ -103,7 +259,43 @@ namespace EventManager.ViewModel
                     Temp.Add(item);
             }
             OfficerGradeTypes = Temp;
+            GradeOfNewOfficer = OfficerGradeTypes.First();
+
+
+            ObservableCollection<Officers> Temp1 = new ObservableCollection<Officers>();
+            var officerData = officerRepo.GetAllOfficers();
+            foreach (var item in officerData)
+            {
+
+                Temp1.Add(item);
+            }
+            OfficerList = Temp1;
+            FilteredOfficerList = new ObservableCollection<Officers>();
         }
+
+
+        public void RefreshList()
+        {
+            if(FilteredOfficerList!=null)
+                FilteredOfficerList.Clear();
+
+            if(OfficerList != null)
+            {
+                foreach (var item in OfficerList)
+                {
+                    
+                    if (item.OfficerGrade.JsonCompare(GradeOfNewOfficer))
+                    {
+                        FilteredOfficerList.Add(item);
+                    }
+                }
+            }
+           
+        }
+        
+        #endregion
+
+
 
     }
 }

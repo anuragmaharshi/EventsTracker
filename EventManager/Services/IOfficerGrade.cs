@@ -10,6 +10,10 @@ namespace EventManager.Services
     {
         void AddOfficerGradeAsync(OfficerGradeType officerGrade);
 
+        void UpdateOfficerGrade(OfficerGradeType officerGrade);
+
+        void DeleteOfficerGrader(OfficerGradeType officerGrade);
+
         List<OfficerGradeType> GetAllOfficerGrades();
     }
 }

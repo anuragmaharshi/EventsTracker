@@ -18,7 +18,7 @@
     </UserControl.DataContext>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
-            <ei:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="LoadData"/>
+            <ei:CallMethodAction TargetObject="{Binding}" MethodName="LoadData"/>
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid>
@@ -43,7 +43,7 @@
                 <TextBlock Text="Add Officer Type" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="5,0,0,0" 
                        FontWeight="ExtraBold" FontSize="25" Foreground="DarkBlue" FontStretch="Expanded"
                        HorizontalAlignment="Center"/>
-                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Name="txtOfficeGradeName" Text="{Binding NewOfficerGradeName}"  />
+                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Name="txtOfficeGradeName" Text="{Binding NewGradeName}"  />
                 <Button Grid.Row="2" Grid.Column="3" Content="Add" Command="{Binding Path=AddOfficerGrade}" IsEnabled="{Binding ElementName=txtOfficeGradeName,Path=Text.Length,Mode=OneWay}"/>
                 <DataGrid  Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding OfficerGradeTypes}"
                   AutoGenerateColumns="False" CanUserAddRows="False" ColumnWidth="*" SelectedItem="{Binding SelectedOfficerGrade}">
@@ -51,13 +51,14 @@
                         <DataGridTextColumn Header="Grade Type"  Binding="{Binding OfficerGrade}" />
                     </DataGrid.Columns>
                 </DataGrid>
-                <Button Grid.Row="4" Grid.Column="1" Content="Save" Command="{Binding Path=SaveAlpha}"/>
-                <Button Grid.Row="4" Grid.Column="3" Content="Delete" Command="{Binding Path=DeleteAlpha}"/>
+                <Button Grid.Row="4" Grid.Column="1" Content="Save" Command="{Binding Path=SaveOfficerGrade}"/>
+                <Button Grid.Row="4" Grid.Column="3" Content="Delete" Command="{Binding Path=DeleteOfficerGrade}"/>
             </Grid>
             <Separator Width="40" Background="Transparent"/>
             <Grid Width="500">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20" />
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -75,15 +76,28 @@
                 <TextBlock Text="Add officer details" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" 
                            FontSize="25" FontWeight="ExtraBold" Foreground="DarkBlue" FontStretch="Expanded"/>
                 <TextBlock Text="Officer Type" Grid.Row="2" Grid.Column="1" Name="a"/>
-                <ComboBox Grid.Row="2" Grid.Column="2"/>
+                <ComboBox Grid.Row="2" Grid.Column="2"  ItemsSource="{Binding OfficerGradeTypes}"
+                         SelectedItem="{Binding GradeOfNewOfficer}" >
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding OfficerGrade}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <TextBlock Text="Officer Name" Grid.Row="3" Grid.Column="1"/>
-                <TextBox Grid.Row="3" Grid.Column="2"/>
+                <TextBox Grid.Row="3" Grid.Column="2" Name="txtNewOfficerName" Text="{Binding NewOfficerName}"/>
                 <TextBlock Text="Phone Number" Grid.Row="4" Grid.Column="1"/>
-                <TextBox Grid.Row="4" Grid.Column="2"/>
-                <Button Grid.Row="4" Grid.Column="3" Content="Add" Command="{Binding Path=asd}" IsEnabled="{Binding ElementName=OfficerType,Path=Text.Length,Mode=OneWay}"/>
-
-                <Button Grid.Row="5" Grid.Column="1" Content="Save" Command="{Binding Path=SaveAlpha}"/>
-                <Button Grid.Row="5" Grid.Column="3" Content="Delete" Command="{Binding Path=DeleteAlpha}"/>
+                <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding NewOfficerPhoneNumber}"/>
+                <Button Grid.Row="4" Grid.Column="3" Content="Add" Command="{Binding Path=AddNewOfficer}"/>
+                <ListBox Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="1" ItemsSource="{Binding FilteredOfficerList}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Button Grid.Row="6" Grid.Column="1" Content="Save" Command="{Binding Path=SaveAlpha}"/>
+                <Button Grid.Row="6" Grid.Column="3" Content="Delete" Command="{Binding Path=DeleteAlpha}"/>
 
             </Grid>
         </StackPanel>

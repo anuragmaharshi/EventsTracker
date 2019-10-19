@@ -20,6 +20,8 @@ namespace EventManager.Services
             }
         }
 
+       
+
         public List<OfficerGradeType> GetAllOfficerGrades()
         {
             using (var db = new LiteDatabase(connectionString))
@@ -30,6 +32,24 @@ namespace EventManager.Services
             }
 
             
+        }
+
+        public void UpdateOfficerGrade(OfficerGradeType officerGrade)
+        {
+            using (var db = new LiteDatabase(connectionString))
+            {
+                var col = db.GetCollection<OfficerGradeType>("OfficerGrades");
+                col.Update(officerGrade);
+            }
+        }
+
+        public void DeleteOfficerGrader(OfficerGradeType officerGrade)
+        {
+            using (var db = new LiteDatabase(connectionString))
+            {
+                var col = db.GetCollection<OfficerGradeType>("OfficerGrades");
+                col.Delete(officerGrade.Id);
+            }
         }
     }
 }
