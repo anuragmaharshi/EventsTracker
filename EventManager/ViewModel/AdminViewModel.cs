@@ -23,6 +23,8 @@ namespace EventManager.ViewModel
         public RelayCommand SaveOfficerGrade { get; private set; }
 
         public RelayCommand AddNewOfficer { get; private set; }
+        public RelayCommand SaveOfficerDetail { get; private set; }
+        public RelayCommand DeleteOfficer { get; private set; }
         IOfficerGrade repo;
 
         IOfficers officerRepo;
@@ -38,12 +40,40 @@ namespace EventManager.ViewModel
                 SaveOfficerGrade = new RelayCommand(OnSave, CanSave);
 
                 AddNewOfficer = new RelayCommand(OnAddOfficer,canAddOfficer);
+                SaveOfficerDetail = new RelayCommand(OnSaveOfficerDetail, canSaveOfficer);
+                DeleteOfficer = new RelayCommand(OnDeleteOfficer, canDeleteOfficer);
                 repo = new OfficerGradeRepo();
                 officerRepo = new OfficerRepo();
             }
         }
 
-       
+        private bool canDeleteOfficer()
+        {
+            return SelectedOfficer != null;
+        }
+
+        private void OnDeleteOfficer()
+        {
+            MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("Are you sure?", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
+                officerRepo.DeleteOfficer(SelectedOfficer);
+                SelectedOfficerGrade = null;
+                LoadData();
+            }
+        }
+
+        private bool canSaveOfficer()
+        {
+            return SelectedOfficer != null;
+        }
+
+        private void OnSaveOfficerDetail()
+        {
+            officerRepo.UpdateOfficer(SelectedOfficer);
+        }
+
+
 
 
         #endregion
@@ -93,7 +123,9 @@ namespace EventManager.ViewModel
                 PhoneNumber = NewOfficerPhoneNumber,
                 OfficerGrade = GradeOfNewOfficer
             });
-  
+            NewOfficerName = "";
+            NewOfficerPhoneNumber = "";
+            LoadData();
         }
 
         private bool canAddOfficer()
@@ -199,14 +231,6 @@ namespace EventManager.ViewModel
         {
             get
             {
-                //if (_officerList != null)
-                //{
-                //    this.OfficerListView = CollectionViewSource.GetDefaultView(_officerList);
-                //    this.OfficerListView.Filter = Filter;
-
-
-
-                //}
                 return _officerList;
             }
             set
@@ -228,11 +252,25 @@ namespace EventManager.ViewModel
                 _filteredList = value;
                 RaisePropertyChanged("FilteredOfficerList");
             }
-        } 
-        private ICollectionView OfficerListView { get; set; }
-        //{
-        //    get { return CollectionViewSource.GetDefaultView(OfficerList); }
-        //}
+        }
+
+        private Officers _selectedOfficer;
+        public Officers SelectedOfficer
+        {
+            get
+            {
+                return _selectedOfficer;
+            }
+            set
+            {
+                _selectedOfficer = value;
+                RaisePropertyChanged("SelectedOfficer");
+                SaveOfficerDetail.RaiseCanExecuteChanged();
+                DeleteOfficer.RaiseCanExecuteChanged();
+                
+            }
+        }
+      
 
 
         private bool Filter(object item )
@@ -271,6 +309,8 @@ namespace EventManager.ViewModel
             }
             OfficerList = Temp1;
             FilteredOfficerList = new ObservableCollection<Officers>();
+            RefreshList();
+            
         }
 
 

@@ -89,15 +89,15 @@
                 <TextBlock Text="Phone Number" Grid.Row="4" Grid.Column="1"/>
                 <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding NewOfficerPhoneNumber}"/>
                 <Button Grid.Row="4" Grid.Column="3" Content="Add" Command="{Binding Path=AddNewOfficer}"/>
-                <ListBox Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="1" ItemsSource="{Binding FilteredOfficerList}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Name}"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-                <Button Grid.Row="6" Grid.Column="1" Content="Save" Command="{Binding Path=SaveAlpha}"/>
-                <Button Grid.Row="6" Grid.Column="3" Content="Delete" Command="{Binding Path=DeleteAlpha}"/>
+                <DataGrid  Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" ItemsSource="{Binding FilteredOfficerList}"
+                  AutoGenerateColumns="False" CanUserAddRows="False" ColumnWidth="*" SelectedItem="{Binding SelectedOfficer}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name"  Binding="{Binding Name}" />
+                        <DataGridTextColumn Header="Phone Number"  Binding="{Binding PhoneNumber}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Button Grid.Row="6" Grid.Column="1" Content="Save" Command="{Binding Path=SaveOfficerDetail}"/>
+                <Button Grid.Row="6" Grid.Column="3" Content="Delete" Command="{Binding Path=DeleteOfficer}"/>
 
             </Grid>
         </StackPanel>
